@@ -25,15 +25,19 @@ type ArticleParamsFormProps = {
 export const ArticleParamsForm = ({
   setArticleState,
 }: ArticleParamsFormProps): React.JSX.Element => {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [formState, setFormState] = useState(defaultArticleState);
 
   const rootRef = useRef<HTMLDivElement>(null);
 
-  useEffect((): (() => void) => {
+  useEffect((): (() => void) | undefined => {
+    if (!isSidebarOpen) {
+      return;
+    }
+
     const handleOutsideClick = (event: MouseEvent): void => {
-      if (isOpen && rootRef.current && !rootRef.current.contains(event.target as Node)) {
-        setIsOpen(false);
+      if (rootRef.current && !rootRef.current.contains(event.target as Node)) {
+        setIsSidebarOpen(false);
       }
     };
 
@@ -42,7 +46,7 @@ export const ArticleParamsForm = ({
     return (): void => {
       document.removeEventListener('mousedown', handleOutsideClick);
     };
-  }, [isOpen]);
+  }, [isSidebarOpen]);
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>): void => {
     event.preventDefault();
@@ -56,11 +60,14 @@ export const ArticleParamsForm = ({
 
   return (
     <div ref={rootRef}>
-      <ArrowButton isOpen={isOpen} onClick={() => setIsOpen(!isOpen)} />
+      <ArrowButton
+        isOpen={isSidebarOpen}
+        onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+      />
 
       <aside
         className={clsx(styles.container, {
-          [styles.container_open]: isOpen,
+          [styles.container_open]: isSidebarOpen,
         })}
       >
         <form className={styles.form} onSubmit={handleSubmit}>
